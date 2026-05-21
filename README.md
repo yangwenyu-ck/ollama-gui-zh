@@ -110,24 +110,67 @@ ollama pull deepseek-r1:7b
 
 使用 `docker compose restart` 重启容器。模型数据保存在项目目录下的 `./ollama_data` 文件夹中，可在 `compose.yml` 中修改路径。
 
-## 🌐 OpenAI 兼容代理
+## 🌐 核心架构：代理服务与推理监控
 
-项目内置了一个 Node.js 代理服务器（[proxy/server.cjs](proxy/server.cjs)），提供 OpenAI 兼容的 API 格式，可以被 Trae IDE、Continue 等工具直接调用。
+本项目的核心亮点在于内置了一个 **OpenAI 兼容代理服务器**（[proxy/server.cjs](proxy/server.cjs)），它不仅仅是简单的请求转发，更是一个完整的 **AI 推理网关**。
 
-```bash
-# 启动代理服务
-yarn proxy
+### 工作原理
 
-# 代理端口：http://localhost:11435
-# OpenAI 兼容格式：http://localhost:11435/v1/chat/completions
-# 模型列表：http://localhost:11435/v1/models
+项目运行后会提供两个服务地址：
+
+| 服务 | 地址 | 用途 |
+|---|---|---|
+| **Ollama 原生 API** | `http://localhost:11434` | Ollama 默认端口，直接调用大模型 |
+| **代理服务** | `http://localhost:11435` | OpenAI 兼容格式，支持监控和日志记录 |
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────┐
+│   Trae IDE      │     │  Ollama GUI 中文版 │     │   Ollama    │
+│   Continue      │────▶│  (代理 11435)     │────▶│  (11434)    │
+│   其他 AI 工具   │     │  📊 推理监控      │     │  本地大模型  │
+└─────────────────┘     └──────────────────┘     └─────────────┘
 ```
 
-代理服务还提供推理监控 API：
-- `/monitor/stats` — 统计概览
-- `/monitor/logs` — 推理日志
-- `/monitor/ps` — 运行中模型
-- `/monitor/speed-trend` — 速度趋势数据
+### 为什么使用代理地址？
+
+将 AI 工具的 API 请求地址从 `localhost:11434` 改为 `localhost:11435` 后，所有经过代理的请求都会被**自动记录**，你可以在 Web 界面的「推理服务监控」面板中实时查看：
+
+- 📈 **每次调用的详细信息** — 模型名称、输入/输出 Token 数、推理速度（tok/s）、耗时
+- 🚀 **运行中模型状态** — 当前加载的模型、VRAM 占用、上下文长度、量化级别
+- 📊 **速度趋势图** — 实时可视化推理速度变化
+- 🔍 **按模型统计** — 各模型的调用次数、平均速度、总 Token 消耗
+
+### 快速启动
+
+```bash
+# 1. 启动 Ollama
+ollama serve
+
+# 2. 启动代理服务（保持运行）
+yarn proxy
+
+# 3. 在 Trae IDE / Continue 等工具中配置：
+#    API 地址改为 http://localhost:11435
+```
+
+### OpenAI 兼容端点
+
+代理提供标准的 OpenAI Chat Completions 格式，可直接被主流 AI 开发工具调用：
+
+| 端点 | 说明 |
+|---|---|
+| `POST /v1/chat/completions` | 聊天补全（支持流式输出） |
+| `GET /v1/models` | 获取可用模型列表 |
+
+### 监控 API 端点
+
+| 端点 | 说明 |
+|---|---|
+| `GET /monitor/stats` | 推理统计概览（总调用数、总 Token、平均速度） |
+| `GET /monitor/logs?limit=100` | 推理日志列表（支持分页和模型筛选） |
+| `GET /monitor/ps` | 当前运行中的模型状态 |
+| `GET /monitor/speed-trend?limit=80` | 速度趋势数据（用于图表渲染） |
+| `POST /monitor/clear` | 清空推理日志 |
 
 ## 🏭 生产部署
 
