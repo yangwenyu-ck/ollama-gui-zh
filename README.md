@@ -34,7 +34,7 @@
 ### 环境要求
 
 1. 安装 [Ollama](https://ollama.ai/download)
-2. 安装 [Node.js](https://nodejs.org/)（v16+）和 [Yarn](https://classic.yarnpkg.com/lang/en/docs/install)
+2. 安装 [Node.js](https://nodejs.org/)（v18+）和 [Yarn](https://classic.yarnpkg.com/lang/en/docs/install)
 
 ### 本地开发
 
@@ -134,6 +134,17 @@ ollama pull deepseek-r1:7b
 │   其他 AI 工具   │     │  📊 推理监控      │     │  本地大模型  │
 └─────────────────┘     └──────────────────┘     └─────────────┘
 ```
+
+### 设置面板中的「通过 Proxy 连接」
+
+在 Web 界面的**设置面板**中，有一个 **「通过 Proxy 连接」** 开关按钮，用于控制 Web 聊天界面自身的 API 连接方式：
+
+| 开关状态 | Web 聊天界面连接地址 | 说明 |
+|---|---|---|
+| **关闭**（默认） | `http://localhost:11434`（Ollama 原生） | 直接调用 Ollama，对话数据记录在「用量分析」面板 |
+| **开启** | `http://localhost:11435`（代理服务） | 经过代理调用，Web 界面的对话也会被记录到「推理服务监控」面板 |
+
+> **用途：** 此开关主要用于**本地测试**。开启后，你可以验证代理服务是否正常工作，同时在「推理服务监控」面板中观察 Web 界面自身的调用日志。日常使用时保持关闭即可。
 
 ### 为什么使用代理地址？
 
