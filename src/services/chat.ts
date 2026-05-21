@@ -1,8 +1,10 @@
 import { computed, ref } from 'vue'
 import { Chat, db, Message } from './database'
-import { historyMessageLength, currentModel, useConfig } from './appConfig'
+import { historyMessageLength, currentModel, useConfig, useProxy } from './appConfig'
 import { useAI } from './useAI.ts'
 import { ChatCompletedResponse, ChatPartResponse, useApi } from './api.ts'
+
+const conversationStartTime = ref<Map<number, number>>(new Map())
 
 interface ChatExport extends Chat {
   messages: Message[]
@@ -87,7 +89,7 @@ export function useChats() {
       if (chats.value.length > 0) {
         await switchChat(sortedChats.value[0].id!)
       } else {
-        await startNewChat('New chat')
+        await startNewChat('新对话')
       }
     } catch (error) {
       console.error('Failed to initialize chats:', error)
@@ -122,12 +124,19 @@ export function useChats() {
     }
   }
 
-  const renameChat = async (newName: string) => {
-    if (!activeChat.value) return
+  const renameChat = async (chatId: number, newName: string) => {
+    if (!newName.trim()) return
 
-    activeChat.value.name = newName
-    await dbLayer.updateChat(activeChat.value.id!, { name: newName })
-    chats.value = await dbLayer.getAllChats()
+    const chat = chats.value.find(c => c.id === chatId)
+    if (chat) {
+      chat.name = newName
+      await dbLayer.updateChat(chatId, { name: newName })
+      chats.value = await dbLayer.getAllChats()
+      
+      if (activeChat.value?.id === chatId) {
+        activeChat.value.name = newName
+      }
+    }
   }
 
   const startNewChat = async (name: string) => {
@@ -184,6 +193,8 @@ export function useChats() {
       message.id = await dbLayer.addMessage(message)
       messages.value.push(message)
 
+      conversationStartTime.value.set(currentChatId, Date.now())
+
       await generate(
         currentModel.value,
         messages.value,
@@ -213,6 +224,8 @@ export function useChats() {
       messages.value.pop()
     }
     try {
+      conversationStartTime.value.set(currentChatId, Date.now())
+      
       await generate(
         currentModel.value,
         messages.value,
@@ -243,6 +256,41 @@ export function useChats() {
     if (aiMessage) {
       try {
         ongoingAiMessages.value.delete(chatId)
+        
+        const startTime = conversationStartTime.value.get(chatId) || Date.now()
+        const duration = Date.now() - startTime
+        conversationStartTime.value.delete(chatId)
+        
+        const completionTokens = data.eval_count || 0
+        const evalDurationSec = (data.eval_duration || 0) / 1_000_000_000
+        const tokensPerSecond = evalDurationSec > 0 ? (completionTokens / evalDurationSec).toFixed(1) : '0'
+        
+        const metaData = {
+          promptTokens: data.prompt_eval_count || 0,
+          completionTokens,
+          totalTokens: (data.prompt_eval_count || 0) + completionTokens,
+          duration: evalDurationSec.toFixed(2),
+          tokensPerSecond,
+        }
+        
+        await dbLayer.updateMessage(aiMessage.id!, { meta: JSON.parse(JSON.stringify(metaData)) })
+        
+        if (chatId == activeChat.value?.id) {
+          const updatedMessages = await dbLayer.getMessages(chatId)
+          setMessages(updatedMessages)
+        }
+        
+        if (!useProxy.value) {
+          await db.usageStats.add({
+            chatId,
+            model: currentModel.value,
+            promptTokens: data.prompt_eval_count || 0,
+            completionTokens,
+            totalTokens: (data.prompt_eval_count || 0) + completionTokens,
+            duration,
+            createdAt: new Date(),
+          })
+        }
       } catch (error) {
         console.error('Failed to finalize AI message:', error)
       }
@@ -263,7 +311,7 @@ export function useChats() {
       messages.value = []
       ongoingAiMessages.value.clear()
 
-      await startNewChat('New chat')
+      await startNewChat('新对话')
     } catch (error) {
       console.error('Failed to wipe the database:', error)
     }
@@ -280,7 +328,7 @@ export function useChats() {
         if (sortedChats.value.length) {
           await switchChat(sortedChats.value[0].id!)
         } else {
-          await startNewChat('New chat')
+          await startNewChat('新对话')
         }
       }
     } catch (error) {

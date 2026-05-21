@@ -41,7 +41,7 @@ const { disabled = false } = defineProps<Props>()
         @change="handleModelChange"
         class="w-full cursor-pointer rounded-lg bg-white py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50 dark:bg-gray-700 dark:text-gray-100"
       >
-        <option :value="undefined" disabled selected>Select a model</option>
+        <option :value="undefined" disabled selected>选择模型</option>
         <option v-for="model in availableModels" :value="model.name">
           {{ model.name }}
         </option>
@@ -49,7 +49,7 @@ const { disabled = false } = defineProps<Props>()
 
       <button
         :disabled="disabled"
-        title="Refresh available models"
+        title="刷新可用模型"
         @click="performRefreshModel"
         class="inline-flex items-center justify-center rounded-lg border-none bg-gray-100 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50 dark:bg-gray-700 dark:text-gray-100"
       >

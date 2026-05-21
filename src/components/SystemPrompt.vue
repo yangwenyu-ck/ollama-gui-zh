@@ -35,7 +35,7 @@ const onSubmit = () => {
       createdAt: new Date(),
     })
   }
-  alert('Saved !')
+  alert('已保存！')
 }
 
 const shouldSubmit = ({ key, shiftKey }: KeyboardEvent): boolean => {
@@ -60,7 +60,7 @@ const onKeydown = (event: KeyboardEvent) => {
           <span
             class="block h-full rounded border-none p-2 text-lg font-medium text-gray-900 dark:text-gray-100"
           >
-            System Prompts
+            系统提示
           </span>
         </div>
       </div>
@@ -71,11 +71,10 @@ const onKeydown = (event: KeyboardEvent) => {
       <!-- Custom Instructions Section -->
       <div class="rounded-xl bg-gray-100 p-6 shadow-sm dark:bg-gray-800">
         <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Custom Instructions
+          自定义指令
         </h2>
         <p class="mb-4 text-sm text-gray-700 dark:text-gray-300">
-          What would you like the current model to know about you to provide better
-          responses?
+          您希望当前模型了解哪些关于您的信息以提供更好的响应？
         </p>
         <form @submit.prevent="onSubmit">
           <textarea
@@ -90,12 +89,11 @@ const onKeydown = (event: KeyboardEvent) => {
       <!-- Default Instructions Section -->
       <div class="rounded-xl bg-gray-100 p-6 shadow-sm dark:bg-gray-800">
         <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Default Instructions
+          默认指令
         </h2>
         <p class="mb-4 text-sm text-gray-700 dark:text-gray-300">
-          What would you like all models to know about you to provide better responses?
-          This prompt will be applied for all models by default even if you configure
-          custom prompt for a model.
+          您希望所有模型了解哪些关于您的信息以提供更好的响应？
+          此提示将默认应用于所有模型，即使您为某个模型配置了自定义提示。
         </p>
         <form @submit.prevent="onSubmit">
           <textarea
@@ -113,7 +111,7 @@ const onKeydown = (event: KeyboardEvent) => {
           class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-offset-gray-900"
         >
           <IconWritingSign class="h-5 w-5" />
-          Save Changes
+          保存更改
         </button>
       </div>
     </div>

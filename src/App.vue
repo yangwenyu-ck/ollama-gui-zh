@@ -4,11 +4,15 @@ import ChatInput from './components/ChatInput.vue'
 import ChatMessages from './components/ChatMessages.vue'
 import SystemPrompt from './components/SystemPrompt.vue'
 import ModelSelector from './components/ModelSelector.vue'
+import UsageStats from './components/UsageStats.vue'
+import ModelMonitor from './components/ModelMonitor.vue'
 import {
   currentModel,
   isDarkMode,
   isSettingsOpen,
   isSystemPromptOpen,
+  isUsageStatsOpen,
+  isModelMonitorOpen,
 } from './services/appConfig.ts'
 import { nextTick, onMounted, ref } from 'vue'
 import { useAI } from './services/useAI.ts'
@@ -39,8 +43,8 @@ const cancelEditing = () => {
 }
 
 const confirmRename = () => {
-  if (activeChat.value && editedChatName.value) {
-    renameChat(editedChatName.value)
+  if (activeChat.value && editedChatName.value && activeChat.value.id) {
+    renameChat(activeChat.value.id, editedChatName.value)
     isEditingChatName.value = false
   }
 }
@@ -69,7 +73,21 @@ onMounted(() => {
         </div>
 
         <div
-          v-if="!isSystemPromptOpen"
+          v-else-if="isUsageStatsOpen"
+          class="mx-auto flex h-screen w-full max-w-4xl flex-col gap-4 px-4 pb-4 overflow-y-auto"
+        >
+          <UsageStats />
+        </div>
+
+        <div
+          v-else-if="isModelMonitorOpen"
+          class="mx-auto flex h-screen w-full max-w-6xl flex-col gap-4 px-4 pb-4 overflow-y-auto"
+        >
+          <ModelMonitor />
+        </div>
+
+        <div
+          v-else
           class="mx-auto flex h-screen w-full max-w-7xl flex-col gap-4 px-4 pb-4"
         >
           <div

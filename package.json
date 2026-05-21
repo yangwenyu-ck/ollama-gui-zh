@@ -1,10 +1,11 @@
 {
-  "name": "ollama-gui",
+  "name": "ollama-gui-zh",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "proxy": "node proxy/server.cjs",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "format": "npx prettier --write src"
@@ -17,7 +18,6 @@
     "autoprefixer": "^10.4.16",
     "date-fns": "^3.0.1",
     "dexie": "^3.2.4",
-    "gravatar-url": "^4.0.1",
     "highlight.js": "^11.9.0",
     "markdown-it": "^14.0.0",
     "markdown-it-anchor": "^8.6.7",

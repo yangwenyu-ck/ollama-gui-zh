@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Message } from '../../services/database.ts'
-import { avatarUrl, enableMarkdown } from '../../services/appConfig.ts'
+import { enableMarkdown } from '../../services/appConfig.ts'
 import Markdown from '../Markdown.ts'
 
 type Props = {
@@ -12,11 +12,7 @@ const { message } = defineProps<Props>()
 
 <template>
   <div class="flex flex-row px-2 py-4 sm:px-4">
-    <img v-if="avatarUrl" class="mr-2 flex size-10 rounded-full sm:mr-4" :src="avatarUrl" />
-    <div
-      v-else
-      class="mr-2 flex size-10 aspect-square items-center justify-center rounded-full bg-white text-center text-2xl dark:bg-gray-600 sm:mr-4"
-    >
+    <div class="mr-2 flex size-10 aspect-square items-center justify-center rounded-full bg-white text-center text-2xl dark:bg-gray-600 sm:mr-4">
       🧑
     </div>
 

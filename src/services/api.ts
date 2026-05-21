@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { baseUrl } from './appConfig.ts'
+import { baseUrl, useProxy, PROXY_URL } from './appConfig.ts'
 import { Message } from './database.ts'
 
 export type ChatRequest = {
@@ -112,12 +112,10 @@ export type GenerateEmbeddingsResponse = {
 
 // Define a method to get the full API URL for a given path
 const getApiUrl = (path: string) => {
-  // In development mode, use relative paths to leverage Vite proxy
-  if (import.meta.env.DEV) {
-    return `/api${path}`
+  if (useProxy.value) {
+    return `${PROXY_URL}/api${path}`
   }
-  // In production, use the configured base URL
-  return `${baseUrl.value || 'http://localhost:11434/api'}${path}`
+  return `http://localhost:11434/api${path}`
 }
 
 const abortController = ref<AbortController>(new AbortController())
@@ -145,6 +143,7 @@ export const useApi = () => {
 
     const reader = res.body?.getReader()
     let results: ChatResponse[] = []
+    let buffer = ''
 
     if (reader) {
       while (true) {
@@ -153,14 +152,30 @@ export const useApi = () => {
           break
         }
 
-        try {
-          const chunk = new TextDecoder().decode(value)
-          const parsedChunk: ChatPartResponse = JSON.parse(chunk)
+        buffer += new TextDecoder().decode(value)
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
 
+        for (const line of lines) {
+          const trimmed = line.trim()
+          if (!trimmed) continue
+          try {
+            const parsedChunk: ChatPartResponse = JSON.parse(trimmed)
+            onDataReceived(parsedChunk)
+            results.push(parsedChunk)
+          } catch (e) {
+            // Skip malformed lines
+          }
+        }
+      }
+
+      if (buffer.trim()) {
+        try {
+          const parsedChunk: ChatPartResponse = JSON.parse(buffer.trim())
           onDataReceived(parsedChunk)
           results.push(parsedChunk)
         } catch (e) {
-          // Carry on...
+          // Skip malformed trailing data
         }
       }
     }
@@ -185,13 +200,34 @@ export const useApi = () => {
 
   // List local models
   const listLocalModels = async (): Promise<ListLocalModelsResponse> => {
-    const response = await fetch(getApiUrl('/tags'), {
+    const url = getApiUrl('/tags')
+    console.log('Fetching models from:', url)
+    
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     })
-    return await response.json()
+    
+    console.log('Response status:', response.status)
+    console.log('Response headers:', response.headers)
+    
+    if (!response.ok) {
+      const text = await response.text()
+      console.error('API Error:', response.status, text)
+      throw new Error(`API request failed: ${response.status}`)
+    }
+    
+    try {
+      const result = await response.json()
+      console.log('Models fetched:', result)
+      return result
+    } catch (e) {
+      const text = await response.text()
+      console.error('JSON parse error, response text:', text)
+      throw new Error('Failed to parse JSON response')
+    }
   }
 
   // Show model information

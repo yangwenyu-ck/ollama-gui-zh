@@ -16,3 +16,101 @@
 .slide-leave-from {
   transform: translateX(0);
 }
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-fade-out {
+  animation: fade-out 0.3s ease-out;
+}
+
+.code-block-container {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: rgb(17 24 39);
+}
+
+.code-block-container.expanded {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  z-index: 100;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.code-block-container.expanded pre {
+  height: calc(100% - 60px);
+  overflow-y: auto;
+  font-size: 1rem;
+}
+
+.code-toolbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background-color: rgba(31, 41, 55, 0.8);
+  border-bottom-left-radius: 0.5rem;
+}
+
+.code-toolbar-btn {
+  padding: 0.375rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.15s ease;
+}
+
+.code-toolbar-btn:hover {
+  background-color: rgb(55 65 81);
+}
+
+.code-toolbar-btn svg {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(156 163 175);
+}
+
+.markdown-content pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  color: #ffffff;
+}
+
+.markdown-content .code-block-container pre code {
+  color: #e5e7eb;
+}
+
+.code-block-container pre code,
+.code-block-container pre {
+  color: #e5e7eb;
+}

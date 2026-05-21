@@ -11,7 +11,11 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:11434',
         changeOrigin: true,
-      }
+      },
+      '/monitor': {
+        target: 'http://localhost:11435',
+        changeOrigin: true,
+      },
     }
   }
 })

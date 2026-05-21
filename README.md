@@ -2,84 +2,78 @@
   <img src=".github/header.png" alt="Ollama GUI logo">
 </p>
 
-<h1 align="center">Ollama GUI</h1>
-<p align="center">A modern web interface for chatting with your local LLMs through Ollama</p>
+<h1 align="center">Ollama GUI 中文版</h1>
+<p align="center">一个现代化的本地大语言模型 Web 聊天界面，基于 Ollama 构建</p>
 
 <p align="center">
   <a href="https://ollama.ai">
     <img src="https://img.shields.io/badge/Powered%20by-Ollama-blue?style=flat-square" alt="Powered by Ollama">
   </a>
-  <a href="https://github.com/HelgeSverre/ollama-gui/blob/main/LICENSE.md">
+  <a href="https://github.com/yangwenyu-ck/ollama-gui-zh/blob/main/LICENSE.md">
     <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License">
-  </a>
-  <a href="https://ollama-gui.vercel.app">
-    <img src="https://img.shields.io/badge/Demo-Live-success?style=flat-square" alt="Live Demo">
   </a>
 </p>
 
-## ✨ Features
+## ✨ 功能特性
 
-- 🖥️ Clean, modern interface for interacting with Ollama models
-- 💾 Local chat history using IndexedDB
-- 📝 Full Markdown support in messages
-- 🌙 Dark mode support
-- 🚀 Fast and responsive
-- 🔒 Privacy-focused: All processing happens locally
-- 🌐 Development proxy for easy network access
+- 🖥️ 简洁现代的 Web 界面，与 Ollama 本地模型流畅对话
+- 💾 基于 IndexedDB 的本地聊天记录持久化存储
+- 📝 完整的 Markdown 渲染 + 代码语法高亮 + 一键复制代码
+- 🌙 深色/浅色主题切换
+- 🤖 多模型支持 — 自动加载本地已安装模型，每个对话可绑定不同模型
+- ⚙️ 系统提示词配置 — 支持全局默认提示和按模型自定义提示
+- 📊 用量分析面板 — Token 用量统计、对话次数、响应速度等可视化
+- 🖥️ 推理服务监控 — 实时监控推理调用日志、运行中模型状态、VRAM 占用、速度趋势图
+- 📥 对话导入/导出 — 支持 JSON 格式导入导出，方便数据备份迁移
+- 🌐 OpenAI 兼容代理 — 内置代理服务器提供 OpenAI 格式 API，可对接 Trae IDE 等工具
+- 🔒 隐私优先 — 所有数据存储在浏览器本地，处理完全在本地完成
+- 🐳 Docker 一键部署
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-### Prerequisites (only needed for local development)
+### 环境要求
 
-1. Install [Ollama](https://ollama.ai/download)
-2. Install [Node.js](https://nodejs.org/) (v16+) and [Yarn](https://classic.yarnpkg.com/lang/en/docs/install)
+1. 安装 [Ollama](https://ollama.ai/download)
+2. 安装 [Node.js](https://nodejs.org/)（v16+）和 [Yarn](https://classic.yarnpkg.com/lang/en/docs/install)
 
-### Local Development
+### 本地开发
 
 ```bash
-# Start Ollama server with your preferred model
-ollama pull mistral  # or any other model
+# 启动 Ollama 服务并拉取模型
+ollama pull mistral  # 或任意其他模型
 ollama serve
 
-# Clone and run the GUI
-git clone https://github.com/HelgeSverre/ollama-gui.git
-cd ollama-gui
+# 克隆并运行 GUI
+git clone https://github.com/yangwenyu-ck/ollama-gui-zh.git
+cd ollama-gui-zh
 yarn install
 yarn dev
 ```
 
-#### Network Access (Development Only)
+#### 局域网访问（仅开发模式）
 
-The development server includes an automatic proxy that forwards API requests to your local Ollama instance. This allows other devices on your network to access both the UI and Ollama API:
+开发服务器内置代理，可将 API 请求转发到本地 Ollama 实例，局域网内其他设备可同时访问 UI 和 API：
 
 ```bash
-# Start dev server with network access
+# 启动支持局域网访问的开发服务器
 yarn dev --host
 
-# Access from other devices using your machine's IP
-# Example: http://192.168.1.100:5173
+# 其他设备通过本机 IP 访问
+# 例如：http://192.168.1.100:5173
 ```
 
-**Note:** This proxy feature is only available during development with `yarn dev`. For production deployments, you'll need to configure CORS on your Ollama instance or use a reverse proxy.
+> **注意：** 代理功能仅在 `yarn dev` 开发模式下可用。生产环境请配置 Ollama CORS 或使用反向代理。
 
-To disable the proxy (e.g., when using a custom Ollama endpoint):
+禁用代理（例如使用自定义 Ollama 端点时）：
 ```bash
 VITE_NO_PROXY=true yarn dev
 ```
 
-### Using the Hosted Version
+### Docker 部署
 
-To use the [hosted version](https://ollama-gui.vercel.app), run Ollama with:
+Docker 方案同时运行 Ollama 和 GUI，无需额外配置代理或 CORS，只需安装 `docker` 即可。
 
-```bash
-OLLAMA_ORIGINS=https://ollama-gui.vercel.app ollama serve
-```
-
-### Docker Deployment
-
-The Docker setup runs both Ollama and the GUI together, so no proxy or CORS configuration is needed. No need to install anything other than `docker`.
-
-> If you have GPU, please uncomment the following lines in the file `compose.yml`
+> 如果有 NVIDIA GPU，请在 `compose.yml` 中取消以下注释：
 ```Dockerfile
     # deploy:
     #   resources:
@@ -90,72 +84,96 @@ The Docker setup runs both Ollama and the GUI together, so no proxy or CORS conf
     #           capabilities: [gpu]
 ```
 
-#### Run
+#### 启动
 ```bash
 docker compose up -d
 
-# Access at http://localhost:8080
+# 访问 http://localhost:8080
 ```
 
-#### Stop
+#### 停止
 ```bash
 docker compose down
 ```
 
-#### Download more models
+#### 下载更多模型
 ```bash
-# Enter the ollama container
+# 进入 ollama 容器
 docker exec -it ollama bash
 
-# Inside the container
-ollama pull <model_name>
+# 在容器内下载模型
+ollama pull <模型名称>
 
-# Example
+# 示例
 ollama pull deepseek-r1:7b
 ```
 
-Restart the containers using `docker compose restart`.
+使用 `docker compose restart` 重启容器。模型数据保存在项目目录下的 `./ollama_data` 文件夹中，可在 `compose.yml` 中修改路径。
 
-Models will get downloaded inside the folder `./ollama_data` in the repository. You can change it inside the `compose.yml`
+## 🌐 OpenAI 兼容代理
 
-## 🏭 Production Deployment
+项目内置了一个 Node.js 代理服务器（[proxy/server.cjs](proxy/server.cjs)），提供 OpenAI 兼容的 API 格式，可以被 Trae IDE、Continue 等工具直接调用。
 
-When building the application for production (`yarn build`), the resulting static files do not include a proxy server. You have several options for production deployments:
-
-### Option 1: Configure CORS on Ollama
 ```bash
-# Allow your production domain
+# 启动代理服务
+yarn proxy
+
+# 代理端口：http://localhost:11435
+# OpenAI 兼容格式：http://localhost:11435/v1/chat/completions
+# 模型列表：http://localhost:11435/v1/models
+```
+
+代理服务还提供推理监控 API：
+- `/monitor/stats` — 统计概览
+- `/monitor/logs` — 推理日志
+- `/monitor/ps` — 运行中模型
+- `/monitor/speed-trend` — 速度趋势数据
+
+## 🏭 生产部署
+
+构建生产版本（`yarn build`）后生成静态文件，不包含代理服务器。有以下部署方案：
+
+### 方案一：配置 Ollama CORS
+```bash
 OLLAMA_ORIGINS=https://your-domain.com ollama serve
 ```
 
-### Option 2: Use a Reverse Proxy
-Set up a reverse proxy (nginx, Apache, Caddy) to forward `/api` requests to your Ollama instance.
+### 方案二：使用反向代理
+配置 Nginx / Apache / Caddy 将 `/api` 请求转发到 Ollama 实例。
 
-### Option 3: Use Docker Compose
-The provided Docker setup runs both services together, eliminating CORS issues:
+### 方案三：使用 Docker Compose
 ```bash
 docker compose up -d
 ```
 
-## 🛣️ Roadmap
+## 🛣️ 路线图
 
-- [x] Chat history with IndexedDB
-- [x] Markdown message formatting
-- [x] Code cleanup and organization
-- [ ] Model library browser and installer
-- [ ] Mobile-responsive design
-- [ ] File uploads with OCR support
+- [x] 基于 IndexedDB 的聊天历史存储
+- [x] Markdown 消息格式化 + 代码高亮
+- [x] 深色/浅色主题切换
+- [x] 多模型管理与切换
+- [x] 系统提示词配置
+- [x] 用量分析面板
+- [x] 推理服务监控面板
+- [x] 对话导入/导出
+- [x] OpenAI 兼容代理服务器
+- [ ] 模型库浏览与一键安装
+- [ ] 移动端响应式适配
+- [ ] 文件上传与 OCR 支持
 
-## 🛠️ Tech Stack
+## 🛠️ 技术栈
 
-- [Vue.js](https://vuejs.org/) - Frontend framework
-- [Vite](https://vitejs.dev/) - Build tool
-- [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [VueUse](https://vueuse.org/) - Vue Composition Utilities
-- [@tabler/icons-vue](https://github.com/tabler/icons-vue) - Icons
-- Design inspired by [LangUI](https://www.langui.dev/)
-- Hosted on [Vercel](https://vercel.com/)
+- [Vue.js 3](https://vuejs.org/) — 前端框架（Composition API + TypeScript）
+- [Vite 5](https://vitejs.dev/) — 构建工具
+- [Tailwind CSS](https://tailwindcss.com/) — 样式框架
+- [Dexie.js](https://dexie.org/) — IndexedDB 封装
+- [markdown-it](https://github.com/markdown-it/markdown-it) + [highlight.js](https://highlightjs.org/) — Markdown 渲染与代码高亮
+- [VueUse](https://vueuse.org/) — Vue 组合式工具库
+- [@tabler/icons-vue](https://github.com/tabler/icons-vue) — 图标库
+- [Docker](https://www.docker.com/) + Nginx — 容器化部署
 
-## 📄 License
+设计灵感来源于 [LangUI](https://www.langui.dev/)，基于 [HelgeSverre/ollama-gui](https://github.com/HelgeSverre/ollama-gui) 二次开发。
 
-Released under the [MIT License](LICENSE.md).
+## 📄 许可证
+
+本项目基于 [MIT 协议](LICENSE.md) 开源。

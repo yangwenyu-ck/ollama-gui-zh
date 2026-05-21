@@ -1,15 +1,18 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
 import { IconFileExport, IconUpload, IconLayoutSidebarRightCollapse, IconTrashX } from '@tabler/icons-vue'
 import ToggleInput from './Inputs/ToggleInput.vue'
 import TextInput from './Inputs/TextInput.vue'
 import ExportButton from './History/ExportButton.vue'
 import ImportButton from './History/ImportButton.vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 import {
   baseUrl,
+  useProxy,
+  PROXY_URL,
   historyMessageLength,
   enableMarkdown,
   showSystem,
-  gravatarEmail,
   toggleSettingsPanel,
 } from '../services/appConfig.ts'
 import { useChats } from '../services/chat.ts'
@@ -17,10 +20,45 @@ import { useChats } from '../services/chat.ts'
 const { wipeDatabase } =
   useChats()
 
-const confirmWipe = () => {
-  if (confirm('Delete all chat history?')) {
-    wipeDatabase()
+const showConfirmDialog = ref(false)
+const proxyConnected = ref(false)
+let healthTimer: ReturnType<typeof setInterval> | null = null
+
+const checkProxyHealth = async () => {
+  try {
+    const res = await fetch(`${PROXY_URL}/monitor/stats`)
+    proxyConnected.value = res.ok
+    if (!res.ok && useProxy.value) {
+      useProxy.value = false
+    }
+  } catch {
+    proxyConnected.value = false
+    if (useProxy.value) {
+      useProxy.value = false
+    }
   }
+}
+
+onMounted(() => {
+  checkProxyHealth()
+  healthTimer = setInterval(checkProxyHealth, 5000)
+})
+
+onUnmounted(() => {
+  if (healthTimer) clearInterval(healthTimer)
+})
+
+const confirmWipe = () => {
+  showConfirmDialog.value = true
+}
+
+const handleConfirm = () => {
+  wipeDatabase()
+  showConfirmDialog.value = false
+}
+
+const handleCancel = () => {
+  showConfirmDialog.value = false
 }
 </script>
 
@@ -36,9 +74,9 @@ const confirmWipe = () => {
         >
           <IconLayoutSidebarRightCollapse class="h-6 w-6" />
 
-          <span class="sr-only">Close settings sidebar</span>
+          <span class="sr-only">关闭设置侧边栏</span>
         </button>
-        <h2 class="text-lg font-medium">Settings</h2>
+        <h2 class="text-lg font-medium">设置</h2>
       </div>
 
       <!-- More Settings -->
@@ -46,17 +84,16 @@ const confirmWipe = () => {
         class="mb-4 border-t border-gray-200 px-2 py-4 text-gray-900 dark:border-gray-700 dark:text-gray-100"
       >
         <div>
-          <ToggleInput label="Enable Markdown" v-model="enableMarkdown" />
-          <ToggleInput label="Show System messages" v-model="showSystem" />
+          <ToggleInput label="启用 Markdown" v-model="enableMarkdown" />
+          <ToggleInput label="显示系统消息" v-model="showSystem" />
+          <ToggleInput label="通过 Proxy 连接" v-model="useProxy" :disabled="!proxyConnected" />
         </div>
 
-        <TextInput id="base-url" label="Base URL" v-model="baseUrl" />
-
-        <TextInput id="gravatar-email" label="Gravatar Email" v-model="gravatarEmail" />
+        <TextInput id="base-url" label="基础 URL" v-model="baseUrl" />
 
         <div>
           <label for="chat-history-length" class="mb-2 mt-4 block px-2 text-sm font-medium">
-            Conversation History Size
+            对话历史大小
           </label>
           <input
             type="number"
@@ -120,14 +157,14 @@ const confirmWipe = () => {
         >
           <IconUpload class="size-4 opacity-50 group-hover:opacity-80" />
 
-          Import chats
+          导入对话
         </ImportButton>
         <ExportButton
           class="group flex w-full items-center gap-x-2 rounded-md px-3 py-2 text-left text-sm font-medium text-gray-900 transition-colors duration-100 ease-in-out hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-300 dark:hover:bg-gray-700 dark:focus:ring-blue-500"
         >
           <IconFileExport class="size-4 opacity-50 group-hover:opacity-80" />
 
-          Export chats
+          导出对话
         </ExportButton>
         <button
           @click="confirmWipe"
@@ -135,9 +172,20 @@ const confirmWipe = () => {
         >
           <IconTrashX class="size-4 opacity-50 group-hover:opacity-80" />
 
-          Delete all chats
+          删除所有对话
         </button>
       </div>
     </div>
+    
+    <ConfirmDialog
+      :show="showConfirmDialog"
+      title="删除所有对话"
+      message="确定要删除所有对话历史吗？此操作将清空所有数据且无法撤销。"
+      confirmText="全部删除"
+      cancelText="取消"
+      type="danger"
+      @confirm="handleConfirm"
+      @cancel="handleCancel"
+    />
   </aside>
 </template>
