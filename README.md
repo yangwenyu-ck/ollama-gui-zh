@@ -46,8 +46,8 @@ ollama serve
 # 克隆并运行 GUI
 git clone https://github.com/yangwenyu-ck/ollama-gui-zh.git
 cd ollama-gui-zh
-yarn install
-yarn dev
+yarn install / npm install
+yarn dev / npm run dev
 ```
 
 #### 局域网访问（仅开发模式）
@@ -113,6 +113,10 @@ ollama pull deepseek-r1:7b
 ## 🌐 核心架构：代理服务与推理监控
 
 本项目的核心亮点在于内置了一个 **OpenAI 兼容代理服务器**（[proxy/server.cjs](proxy/server.cjs)），它不仅仅是简单的请求转发，更是一个完整的 **AI 推理网关**。
+
+<p align="center">
+  <img src="public/favicon/zh-3.png" alt="推理服务监控面板" width="800">
+</p>
 
 ### 工作原理
 
